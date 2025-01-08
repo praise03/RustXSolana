@@ -11,19 +11,28 @@ describe("err", () => {
 
   let myKeypair = anchor.web3.Keypair.generate();
 
-  it("Is signed by multiple signers", async () => {
-    // Add your test here.
+  it("Is called by the owner", async () => {
     const tx = await program.methods
       .initialize()
       .accounts({
-        signer1: program.provider.publicKey,
-        signer2: myKeypair.publicKey,
+        signerAccount: program.provider.publicKey,
+      })
+      .rpc();
+
+    console.log("Transaction hash:", tx);
+  });
+
+  it("Is NOT called by the owner", async () => {
+    
+    const tx = await program.methods
+      .initialize()
+      .accounts({
+        signerAccount: myKeypair.publicKey,
       })
       .signers([myKeypair])
       .rpc();
 
-    console.log("The signer1: ", program.provider.publicKey.toBase58());
-    console.log("The signer2: ", myKeypair.publicKey.toBase58());
+    console.log("Transaction hash:", tx);
   });
 
 });
