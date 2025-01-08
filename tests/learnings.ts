@@ -9,46 +9,22 @@ describe("err", () => {
 
   const program = anchor.workspace.Err as Program<Err>;
 
-  it("Input test", async () => {
-    // Add your test here.
-    try {
-      const tx = await program.methods.limitRange(new anchor.BN(9)).rpc();
-      console.log("Your transaction signature", tx);
-    } catch (_err) {
-      assert.isTrue(_err instanceof AnchorError);
-      const err: AnchorError = _err;
-      const errMsg =
-        "a is too small";
-      assert.strictEqual(err.error.errorMessage, errMsg);
-      console.log("Error number:", err.error.errorCode.number);
-    }
+  let myKeypair = anchor.web3.Keypair.generate();
 
-    try {
-      const tx = await program.methods.limitRange(new anchor.BN(101)).rpc();
-      console.log("Your transaction signature", tx);
-    } catch (_err) {
-      assert.isTrue(_err instanceof AnchorError);
-      const err: AnchorError = _err;
-      const errMsg =
-        "a is too big";
-      assert.strictEqual(err.error.errorMessage, errMsg);
-      console.log("Error number:", err.error.errorCode.number);
-    }
+  it("Is signed by multiple signers", async () => {
+    // Add your test here.
+    const tx = await program.methods
+      .initialize()
+      .accounts({
+        signer1: program.provider.publicKey,
+        signer2: myKeypair.publicKey,
+      })
+      .signers([myKeypair])
+      .rpc();
+
+    console.log("The signer1: ", program.provider.publicKey.toBase58());
+    console.log("The signer2: ", myKeypair.publicKey.toBase58());
   });
 
-  it("Error test", async () => {
-    // Add your test here.
-    try {
-      const tx = await program.methods.func().rpc();
-      console.log("Your transaction signature", tx);
-    } catch (_err) {
-      assert.isTrue(_err instanceof AnchorError);
-      const err: AnchorError = _err;
-      const errMsg =
-        "Always errors";
-      assert.strictEqual(err.error.errorMessage, errMsg);
-      console.log("Error number:", err.error.errorCode.number);
-    }
-  });
 });
 

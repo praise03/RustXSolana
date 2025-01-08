@@ -6,33 +6,19 @@ declare_id!("GNKwvk7KSWMxUS8w4s6S3qSL6gpU4jTVwYhnuzSQpizz");
 pub mod err {
     use super::*;
 
-    pub fn limit_range(ctx: Context<LimitRange>, a: u64) -> Result<()> {
-        if a < 10 {
-            return err!(MyError::AisTooSmall);
-        }
-        if a > 100 {
-            return err!(MyError::AisTooBig);
-        }
-        msg!("Result = {}", a);
-        Ok(())
-    }
+    pub fn initialize(ctx: Context<Initialize>) -> Result<()> {
+        let the_signer1: &mut Signer = &mut ctx.accounts.signer1;
+        let the_signer2: &mut Signer = &mut ctx.accounts.signer2;
 
-    pub fn func(ctx: Context<LimitRange>) -> Result<()> {
-        msg!("Will this print?");
-        return err!(MyError::AlwaysErrors);
+        msg!("The signer1: {:?}", *the_signer1.key);
+        msg!("The signer2: {:?}", *the_signer2.key);
+
+        Ok(())
     }
 }
 
 #[derive(Accounts)]
-pub struct LimitRange {}
-
-#[error_code]
-pub enum MyError {
-    #[msg("a is too small")]
-    AisTooSmall,
-    #[msg("a is too big")]
-    AisTooBig,
-    #[msg("Always errors")]  // NEW ERROR, what do you think the error code will be?
-    AlwaysErrors,
+pub struct Initialize<'info> {
+    pub signer1: Signer<'info>,
+    pub signer2: Signer<'info>,
 }
-
