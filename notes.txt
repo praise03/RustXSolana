@@ -4,3 +4,9 @@ Errors I ran into for future reference.
 
 - Account data too small: solana program extend GNKwvk7KSWMxUS8w4s6S3qSL6gpU4jTVwYhnuzSQpizz 40000 -u l -k ../mykey.json
 (d for devnet, l for localnet)
+
+
+Notes
+-Whenever a Solana program function is called, a Context must be provided. 
+ That Context holds all the accounts that the program will interact with.
+-

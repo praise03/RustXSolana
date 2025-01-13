@@ -11,23 +11,46 @@ describe("err", () => {
 
   let myKeypair = anchor.web3.Keypair.generate();
 
-  it ("Initialize mapping storage", async () => {
+  async function printAccountBalance(account) {
+    const balance = await anchor.getProvider().connection.getBalance(account);
+    console.log(`${account} has ${balance / anchor.web3.LAMPORTS_PER_SOL} SOL`);
+  }
 
-    const key = new anchor.BN(42);
-    const seeds = [key.toArrayLike(Buffer, "le", 8)];
+  it ("Transfers sol", async () => {
+    const recipient = anchor.web3.Keypair.generate();
 
-    let value = anchor.web3.PublicKey.findProgramAddressSync(
-      seeds,
-      program.programId
-    )[0];
+    await printAccountBalance(recipient.publicKey);
 
-    const tx = await program.methods.initialize(key)
-      .accounts({
-        val: value,
-      })
+    // send the account 1 SOL via the program
+    let amount = new anchor.BN(1 * anchor.web3.LAMPORTS_PER_SOL);
+    await program.methods.sendSol(amount)
+      .accounts({recipient: recipient.publicKey})
       .rpc();
 
-    console.log("Transaction hash:", tx);
+    await printAccountBalance(recipient.publicKey);
+  });
+
+  it("Split SOL between multiple accounts", async () => {
+    const recipient1 = anchor.web3.Keypair.generate();
+    const recipient2 = anchor.web3.Keypair.generate();
+    const recipient3 = anchor.web3.Keypair.generate();
+
+    await printAccountBalance(recipient1.publicKey);
+    await printAccountBalance(recipient2.publicKey);
+    await printAccountBalance(recipient3.publicKey);
+
+    const accountMeta1 = {pubkey: recipient1.publicKey, isWritable: true, isSigner: false};
+    const accountMeta2 = {pubkey: recipient2.publicKey, isWritable: true, isSigner: false};
+    const accountMeta3 = {pubkey: recipient3.publicKey, isWritable: true, isSigner: false};
+
+    let amount = new anchor.BN(1 * anchor.web3.LAMPORTS_PER_SOL);
+    await program.methods.splitSol(amount)
+      .remainingAccounts([accountMeta1, accountMeta2, accountMeta3])
+      .rpc();
+
+    await printAccountBalance(recipient1.publicKey);
+    await printAccountBalance(recipient2.publicKey);
+    await printAccountBalance(recipient3.publicKey);
   });
 
 });
