@@ -1,0 +1,6 @@
+Errors I ran into for future reference.
+
+- Solana test validator aborting: cd into target then run "solana-test-validator"
+
+- Account data too small: solana program extend GNKwvk7KSWMxUS8w4s6S3qSL6gpU4jTVwYhnuzSQpizz 40000 -u l -k ../mykey.json
+(d for devnet, l for localnet)

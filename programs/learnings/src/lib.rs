@@ -1,41 +1,39 @@
 use anchor_lang::prelude::*;
+use std::mem::size_of;
+
 
 declare_id!("GNKwvk7KSWMxUS8w4s6S3qSL6gpU4jTVwYhnuzSQpizz");
-
-const OWNER: &str = "QTinRwNM7QNob5wnUMaxFsqxmLxKTdwhwVWKidoFmYv";
 
 
 #[program]
 pub mod err {
+
     use super::*;
 
-    #[access_control(check(&ctx))]
-    pub fn initialize(ctx: Context<OnlyOwner>) -> Result<()> {
-        
-
-        msg!("Holla, I'm the owner.");
+    pub fn initialize(ctx: Context<Initialize>, key:u64) -> Result<()> {
         Ok(())
     }
 }
 
-fn check(ctx: &Context<OnlyOwner>) -> Result<()> {
-    // Check if signer === owner
-    require_keys_eq!(
-        ctx.accounts.signer_account.key(),
-        OWNER.parse::<Pubkey>().unwrap(),
-        OnlyOwnerError::NotOwner
-    );
 
-    Ok(())
-}
 
 #[derive(Accounts)]
-pub struct OnlyOwner<'info> {
+#[instruction(key: u64)]
+pub struct Initialize<'info> {
+    #[account(init,
+              payer = signer_account,
+              space = size_of::<Val>()+8,
+              seeds = [&key.to_le_bytes().as_ref()],
+              bump)]
+    val: Account<'info, Val>,
+
+    #[account(mut)]
     signer_account: Signer<'info>,
+
+    system_program: Program<'info, System>
 }
 
-#[error_code]
-pub enum OnlyOwnerError {
-    #[msg("Only owner can call this function!")]
-    NotOwner,
+#[account]
+pub struct Val {
+    value: u64,
 }

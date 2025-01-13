@@ -11,25 +11,20 @@ describe("err", () => {
 
   let myKeypair = anchor.web3.Keypair.generate();
 
-  it("Is called by the owner", async () => {
-    const tx = await program.methods
-      .initialize()
-      .accounts({
-        signerAccount: program.provider.publicKey,
-      })
-      .rpc();
+  it ("Initialize mapping storage", async () => {
 
-    console.log("Transaction hash:", tx);
-  });
+    const key = new anchor.BN(42);
+    const seeds = [key.toArrayLike(Buffer, "le", 8)];
 
-  it("Is NOT called by the owner", async () => {
-    
-    const tx = await program.methods
-      .initialize()
+    let value = anchor.web3.PublicKey.findProgramAddressSync(
+      seeds,
+      program.programId
+    )[0];
+
+    const tx = await program.methods.initialize(key)
       .accounts({
-        signerAccount: myKeypair.publicKey,
+        val: value,
       })
-      .signers([myKeypair])
       .rpc();
 
     console.log("Transaction hash:", tx);
